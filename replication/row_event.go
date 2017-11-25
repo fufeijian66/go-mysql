@@ -13,6 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	. "github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go/hack"
+	"encoding/json"
+
 )
 
 type errMissingTableMapEvent error
@@ -194,6 +196,12 @@ func (e *TableMapEvent) Dump(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+
+//json化数据格式
+func (h *TableMapEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
+}
 // RowsEventStmtEndFlag is set in the end of the statement.
 const RowsEventStmtEndFlag = 0x01
 
@@ -821,6 +829,12 @@ func (e *RowsEvent) Dump(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+//json化数据格式
+func (h *RowsEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
+}
+
 type RowsQueryEvent struct {
 	Query []byte
 }
@@ -834,4 +848,10 @@ func (e *RowsQueryEvent) Decode(data []byte) error {
 func (e *RowsQueryEvent) Dump(w io.Writer) {
 	fmt.Fprintf(w, "Query: %s\n", e.Query)
 	fmt.Fprintln(w)
+}
+
+//json化数据格式
+func (h *RowsQueryEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }

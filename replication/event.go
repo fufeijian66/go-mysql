@@ -13,6 +13,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/satori/go.uuid"
 	. "github.com/siddontang/go-mysql/mysql"
+	"encoding/json"
 )
 
 const (
@@ -35,10 +36,14 @@ func (e *BinlogEvent) Dump(w io.Writer) {
 	e.Event.Dump(w)
 }
 
+func (e *BinlogEvent) Json() {
+	e.Header.Json()
+	e.Event.Json()
+}
 type Event interface {
 	//Dump Event, format like python-mysql-replication
 	Dump(w io.Writer)
-
+	Json() string
 	Decode(data []byte) error
 }
 
@@ -102,6 +107,12 @@ func (h *EventHeader) Dump(w io.Writer) {
 	fmt.Fprintf(w, "Date: %s\n", time.Unix(int64(h.Timestamp), 0).Format(TimeFormat))
 	fmt.Fprintf(w, "Log position: %d\n", h.LogPos)
 	fmt.Fprintf(w, "Event size: %d\n", h.EventSize)
+}
+
+//json化数据格式
+func (h *EventHeader) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }
 
 var (
@@ -199,6 +210,13 @@ func (e *FormatDescriptionEvent) Dump(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+//json化数据格式
+func (h *FormatDescriptionEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
+}
+
+
 type RotateEvent struct {
 	Position    uint64
 	NextLogName []byte
@@ -215,6 +233,12 @@ func (e *RotateEvent) Dump(w io.Writer) {
 	fmt.Fprintf(w, "Position: %d\n", e.Position)
 	fmt.Fprintf(w, "Next log name: %s\n", e.NextLogName)
 	fmt.Fprintln(w)
+}
+
+//json化数据格式
+func (h *RotateEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }
 
 type XIDEvent struct {
@@ -235,6 +259,12 @@ func (e *XIDEvent) Dump(w io.Writer) {
 		fmt.Fprintf(w, "GTIDSet: %s\n", e.GSet.String())
 	}
 	fmt.Fprintln(w)
+}
+
+//json化数据格式
+func (h *XIDEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }
 
 type QueryEvent struct {
@@ -293,6 +323,13 @@ func (e *QueryEvent) Dump(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+//json化数据格式
+func (h *QueryEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
+}
+
+
 type GTIDEvent struct {
 	CommitFlag     uint8
 	SID            []byte
@@ -329,6 +366,12 @@ func (e *GTIDEvent) Dump(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+//json化数据格式
+func (h *GTIDEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
+}
+
 type BeginLoadQueryEvent struct {
 	FileID    uint32
 	BlockData []byte
@@ -349,6 +392,12 @@ func (e *BeginLoadQueryEvent) Dump(w io.Writer) {
 	fmt.Fprintf(w, "File ID: %d\n", e.FileID)
 	fmt.Fprintf(w, "Block data: %s\n", e.BlockData)
 	fmt.Fprintln(w)
+}
+
+//json化数据格式
+func (h *BeginLoadQueryEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }
 
 type ExecuteLoadQueryEvent struct {
@@ -408,6 +457,12 @@ func (e *ExecuteLoadQueryEvent) Dump(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+//json化数据格式
+func (h *ExecuteLoadQueryEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
+}
+
 // case MARIADB_ANNOTATE_ROWS_EVENT:
 // 	return "MariadbAnnotateRowsEvent"
 
@@ -425,6 +480,12 @@ func (e *MariadbAnnotaeRowsEvent) Dump(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+//json化数据格式
+func (h *MariadbAnnotaeRowsEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
+}
+
 type MariadbBinlogCheckPointEvent struct {
 	Info []byte
 }
@@ -437,6 +498,12 @@ func (e *MariadbBinlogCheckPointEvent) Decode(data []byte) error {
 func (e *MariadbBinlogCheckPointEvent) Dump(w io.Writer) {
 	fmt.Fprintf(w, "Info: %s\n", e.Info)
 	fmt.Fprintln(w)
+}
+
+//json化数据格式
+func (h *MariadbBinlogCheckPointEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }
 
 type MariadbGTIDEvent struct {
@@ -455,6 +522,13 @@ func (e *MariadbGTIDEvent) Decode(data []byte) error {
 func (e *MariadbGTIDEvent) Dump(w io.Writer) {
 	fmt.Fprintf(w, "GTID: %s\n", e.GTID)
 	fmt.Fprintln(w)
+}
+
+
+//json化数据格式
+func (h *MariadbGTIDEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }
 
 type MariadbGTIDListEvent struct {
@@ -484,4 +558,10 @@ func (e *MariadbGTIDListEvent) Decode(data []byte) error {
 func (e *MariadbGTIDListEvent) Dump(w io.Writer) {
 	fmt.Fprintf(w, "Lists: %v\n", e.GTIDs)
 	fmt.Fprintln(w)
+}
+
+//json化数据格式
+func (h *MariadbGTIDListEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }

@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	_ "encoding/json"
+	"encoding/json"
 )
 
 // we don't parse all event, so some we will use GenericEvent instead
@@ -14,6 +16,13 @@ type GenericEvent struct {
 func (e *GenericEvent) Dump(w io.Writer) {
 	fmt.Fprintf(w, "Event data: \n%s", hex.Dump(e.Data))
 	fmt.Fprintln(w)
+}
+
+
+//json化数据格式
+func (h *GenericEvent) Json()string {
+	bytes,_ := json.Marshal(h)
+	return string(bytes)
 }
 
 func (e *GenericEvent) Decode(data []byte) error {
