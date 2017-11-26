@@ -36,9 +36,9 @@ func (e *BinlogEvent) Dump(w io.Writer) {
 	e.Event.Dump(w)
 }
 
-func (e *BinlogEvent) Json() {
-	e.Header.Json()
-	e.Event.Json()
+func (e *BinlogEvent) Json() string{
+	bytes,_ := json.Marshal(e)
+	return string(bytes)
 }
 type Event interface {
 	//Dump Event, format like python-mysql-replication
@@ -64,6 +64,7 @@ func (e *EventError) Error() string {
 type EventHeader struct {
 	Timestamp uint32
 	EventType EventType
+	EventTypeName string
 	ServerID  uint32
 	EventSize uint32
 	LogPos    uint32
@@ -81,6 +82,7 @@ func (h *EventHeader) Decode(data []byte) error {
 	pos += 4
 
 	h.EventType = EventType(data[pos])
+	h.EventTypeName = h.EventType.String()
 	pos++
 
 	h.ServerID = binary.LittleEndian.Uint32(data[pos:])
@@ -273,8 +275,9 @@ type QueryEvent struct {
 	ErrorCode     uint16
 	StatusVars    []byte
 	Schema        []byte
+	SchemaName string
 	Query         []byte
-
+	QueryName string
 	// in fact QueryEvent dosen't have the GTIDSet information, just for beneficial to use
 	GSet GTIDSet
 }
@@ -302,11 +305,12 @@ func (e *QueryEvent) Decode(data []byte) error {
 
 	e.Schema = data[pos : pos+int(schemaLength)]
 	pos += int(schemaLength)
-
+	e.SchemaName = string(e.Schema)
 	//skip 0x00
 	pos++
 
 	e.Query = data[pos:]
+	e.QueryName =string(e.Query)
 	return nil
 }
 

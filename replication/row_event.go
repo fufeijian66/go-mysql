@@ -27,10 +27,13 @@ type TableMapEvent struct {
 	Flags uint16
 
 	Schema []byte
+	SchemaName string
 	Table  []byte
+	TableName string
 
 	ColumnCount uint64
 	ColumnType  []byte
+	ColumnTypeName string
 	ColumnMeta  []uint16
 
 	//len = (ColumnCount + 7) / 8
@@ -51,6 +54,7 @@ func (e *TableMapEvent) Decode(data []byte) error {
 	e.Schema = data[pos : pos+int(schemaLength)]
 	pos += int(schemaLength)
 
+	e.SchemaName = string(e.Schema)
 	//skip 0x00
 	pos++
 
@@ -59,7 +63,7 @@ func (e *TableMapEvent) Decode(data []byte) error {
 
 	e.Table = data[pos : pos+int(tableLength)]
 	pos += int(tableLength)
-
+	e.TableName = string(e.Table)
 	//skip 0x00
 	pos++
 
@@ -69,6 +73,7 @@ func (e *TableMapEvent) Decode(data []byte) error {
 
 	e.ColumnType = data[pos : pos+int(e.ColumnCount)]
 	pos += int(e.ColumnCount)
+	e.ColumnTypeName = string(e.ColumnType)
 
 	var err error
 	var metaData []byte
@@ -214,6 +219,8 @@ type RowsEvent struct {
 	needBitmap2 bool
 
 	Table *TableMapEvent
+
+
 
 	TableID uint64
 
@@ -837,11 +844,13 @@ func (h *RowsEvent) Json()string {
 
 type RowsQueryEvent struct {
 	Query []byte
+	QueryName string
 }
 
 func (e *RowsQueryEvent) Decode(data []byte) error {
 	//ignore length byte 1
 	e.Query = data[1:]
+	e.QueryName = string(e.Query)
 	return nil
 }
 
